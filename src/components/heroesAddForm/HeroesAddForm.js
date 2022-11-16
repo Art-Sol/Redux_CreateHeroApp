@@ -7,9 +7,8 @@ import { v4 as uuidv4 } from 'uuid';
 import store from "../../store";
 import { useSelector, useDispatch } from "react-redux";
 import { useHttp } from "../../hooks/http.hook";
-import { heroCreated } from "../heroesList/heroesSlice";
+import { useCreateHeroMutation } from "../../api/apiSlice";
 import { selectAll  } from "../heroesFilters/filtersSlice";
-
 
 // Задача для этого компонента:
 // Реализовать создание нового героя с введенными данными. Он должен попадать
@@ -21,17 +20,15 @@ import { selectAll  } from "../heroesFilters/filtersSlice";
 // Элементы <option></option> желательно сформировать на базе
 // данных из фильтров
 
-
 const HeroesAddForm = () => {
 	const [ heroName, setHeroName ] = useState('');
 	const [ heroDescr, setHeroDescr ] = useState('');
 	const [ heroElement, setHeroElement ] = useState('');
 
+	const [ createHero ] = useCreateHeroMutation();
+
 	const { filterLoadingStatus } = useSelector(state => state.filters);
 	const filters = selectAll(store.getState());
-	const dispatch = useDispatch();
-	const { request } = useHttp();
-
 
 	const onSubmitHandler = (e) => {
 		e.preventDefault();
@@ -43,10 +40,8 @@ const HeroesAddForm = () => {
 			element: heroElement,
 		}
 
-		request(`http://localhost:3001/heroes`, 'POST', JSON.stringify(newHero))
-			.then(dispatch(heroCreated(newHero)))
-			.catch(err => console.log(err));
-	
+		createHero(newHero).unwrap();
+
 		setHeroName('');
 		setHeroDescr('');
 		setHeroElement('');
